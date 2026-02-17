@@ -1,0 +1,481 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Admin - Dosa Vilas Veg Garden</title>
+    <link rel="stylesheet" href="style.css" />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+
+    <style>
+      @keyframes gradient {
+        0% {
+          background-position: 0% 50%;
+        }
+        25% {
+          background-position: 50% 100%;
+        }
+        50% {
+          background-position: 100% 50%;
+        }
+        75% {
+          background-position: 50% 0%;
+        }
+        100% {
+          background-position: 0% 50%;
+        }
+      }
+
+      .admin-login {
+        min-height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: #1a1a2e;
+      }
+      .login-box {
+        background: white;
+        padding: 2.5rem;
+        border-radius: 20px;
+        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+        max-width: 400px;
+        width: 90%;
+        text-align: center;
+      }
+      .login-box input {
+        width: 100%;
+        padding: 0.75rem;
+        margin: 0.5rem 0;
+        border: 1px solid #ddd;
+        border-radius: 8px;
+        font-family: inherit;
+      }
+      .login-box button {
+        width: 100%;
+        padding: 0.875rem;
+        margin-top: 1rem;
+        background: #027a31;
+        color: white;
+        border: none;
+        border-radius: 8px;
+        font-weight: 600;
+        cursor: pointer;
+      }
+      .dashboard {
+        display: none;
+        background: #f6f7fb;
+        min-height: 100vh;
+      }
+      .order-card {
+        background: white;
+        padding: 1.5rem;
+        border-radius: 12px;
+        margin-bottom: 1rem;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+      }
+      .status-new {
+        border-left: 4px solid #14a44d;
+      }
+      .status-preparing {
+        border-left: 4px solid #f59e0b;
+      }
+      .status-ready {
+        border-left: 4px solid #3b82f6;
+      }
+      .status-completed {
+        border-left: 4px solid #6b7280;
+        opacity: 0.7;
+      }
+      .admin-header {
+        background: #102a1c;
+        color: white;
+        padding: 1rem 1.5rem;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="login-screen" class="admin-login">
+      <div class="login-box">
+        <img
+          src="images/image-removebg-preview (2).png"
+          alt="Logo"
+          style="
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            margin-bottom: 1rem;
+          "
+        />
+        <h2 style="color: #027a31; margin-bottom: 0.5rem">Admin Login</h2>
+        <p style="color: #666; margin-bottom: 1.5rem">Staff Only</p>
+        <form onsubmit="return doLogin(event);">
+          <input type="text" id="admin-user" placeholder="Admin ID" required />
+          <input
+            type="password"
+            id="admin-pass"
+            placeholder="Password"
+            required
+          />
+          <p
+            id="login-err"
+            style="color: #dc2626; font-size: 0.85rem; display: none"
+          >
+            Invalid credentials
+          </p>
+          <button type="submit">Login</button>
+        </form>
+        <p style="margin-top: 1rem; font-size: 0.8rem; color: #999">
+          Default: admin / admin123
+        </p>
+      </div>
+    </div>
+
+    <div id="dashboard" class="dashboard">
+      <div class="admin-header">
+        <div style="display: flex; align-items: center; gap: 0.75rem">
+          <span style="font-size: 1.25rem; font-weight: 700"
+            >🌭 Dosa Vilas Admin</span
+          >
+          <span
+            style="
+              background: #14a44d;
+              color: white;
+              padding: 0.25rem 0.75rem;
+              border-radius: 20px;
+              font-size: 0.75rem;
+            "
+            >LIVE</span
+          >
+        </div>
+        <button
+          onclick="logout()"
+          style="
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            padding: 0.5rem 1rem;
+            border-radius: 8px;
+            cursor: pointer;
+          "
+        >
+          Logout
+        </button>
+      </div>
+
+      <div class="container" style="padding: 2rem 1.5rem">
+        <div
+          style="
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 1rem;
+            margin-bottom: 2rem;
+          "
+        >
+          <div
+            style="
+              background: white;
+              padding: 1.5rem;
+              border-radius: 12px;
+              text-align: center;
+            "
+          >
+            <div style="font-size: 0.9rem; color: #666">New</div>
+            <div
+              id="stat-new"
+              style="font-size: 2rem; font-weight: 700; color: #14a44d"
+            >
+              0
+            </div>
+          </div>
+          <div
+            style="
+              background: white;
+              padding: 1.5rem;
+              border-radius: 12px;
+              text-align: center;
+            "
+          >
+            <div style="font-size: 0.9rem; color: #666">Preparing</div>
+            <div
+              id="stat-prep"
+              style="font-size: 2rem; font-weight: 700; color: #f59e0b"
+            >
+              0
+            </div>
+          </div>
+          <div
+            style="
+              background: white;
+              padding: 1.5rem;
+              border-radius: 12px;
+              text-align: center;
+            "
+          >
+            <div style="font-size: 0.9rem; color: #666">Ready</div>
+            <div
+              id="stat-ready"
+              style="font-size: 2rem; font-weight: 700; color: #3b82f6"
+            >
+              0
+            </div>
+          </div>
+          <div
+            style="
+              background: white;
+              padding: 1.5rem;
+              border-radius: 12px;
+              text-align: center;
+            "
+          >
+            <div style="font-size: 0.9rem; color: #666">Total Today</div>
+            <div
+              id="stat-total"
+              style="font-size: 2rem; font-weight: 700; color: #027a31"
+            >
+              0
+            </div>
+          </div>
+        </div>
+
+        <div
+          style="
+            display: flex;
+            gap: 0.5rem;
+            margin-bottom: 1.5rem;
+            flex-wrap: wrap;
+          "
+        >
+          <button
+            onclick="filter('all')"
+            class="filter-btn"
+            style="
+              padding: 0.5rem 1rem;
+              border: none;
+              background: #027a31;
+              color: white;
+              border-radius: 20px;
+              cursor: pointer;
+            "
+          >
+            All
+          </button>
+          <button
+            onclick="filter('new')"
+            class="filter-btn"
+            style="
+              padding: 0.5rem 1rem;
+              border: none;
+              background: #e0e0e0;
+              border-radius: 20px;
+              cursor: pointer;
+            "
+          >
+            New
+          </button>
+          <button
+            onclick="filter('preparing')"
+            class="filter-btn"
+            style="
+              padding: 0.5rem 1rem;
+              border: none;
+              background: #e0e0e0;
+              border-radius: 20px;
+              cursor: pointer;
+            "
+          >
+            Preparing
+          </button>
+          <button
+            onclick="filter('ready')"
+            class="filter-btn"
+            style="
+              padding: 0.5rem 1rem;
+              border: none;
+              background: #e0e0e0;
+              border-radius: 20px;
+              cursor: pointer;
+            "
+          >
+            Ready
+          </button>
+          <button
+            onclick="filter('completed')"
+            class="filter-btn"
+            style="
+              padding: 0.5rem 1rem;
+              border: none;
+              background: #e0e0e0;
+              border-radius: 20px;
+              cursor: pointer;
+            "
+          >
+            Completed
+          </button>
+        </div>
+
+        <div id="orders-list"></div>
+      </div>
+    </div>
+
+    <script>
+      const ADMIN_USER = "admin";
+      const ADMIN_PASS = "admin123";
+      let currentFilter = "all";
+
+      function doLogin(e) {
+        e.preventDefault();
+        const u = document.getElementById("admin-user").value;
+        const p = document.getElementById("admin-pass").value;
+        if (u === ADMIN_USER && p === ADMIN_PASS) {
+          sessionStorage.setItem("dv_admin", "1");
+          showDashboard();
+        } else {
+          document.getElementById("login-err").style.display = "block";
+        }
+        return false;
+      }
+
+      function logout() {
+        sessionStorage.removeItem("dv_admin");
+        location.reload();
+      }
+
+      function showDashboard() {
+        document.getElementById("login-screen").style.display = "none";
+        document.getElementById("dashboard").style.display = "block";
+        loadOrders();
+        setInterval(loadOrders, 10000);
+      }
+
+      function loadOrders() {
+        const orders = JSON.parse(localStorage.getItem("dv_orders") || "[]");
+        updateStats(orders);
+        renderOrders(orders);
+      }
+
+      function updateStats(orders) {
+        const today = new Date().toDateString();
+        document.getElementById("stat-new").textContent = orders.filter(
+          (o) => o.status === "new",
+        ).length;
+        document.getElementById("stat-prep").textContent = orders.filter(
+          (o) => o.status === "preparing",
+        ).length;
+        document.getElementById("stat-ready").textContent = orders.filter(
+          (o) => o.status === "ready",
+        ).length;
+        document.getElementById("stat-total").textContent = orders.filter(
+          (o) => new Date(o.timestamp).toDateString() === today,
+        ).length;
+      }
+
+      function filter(status) {
+        currentFilter = status;
+        document.querySelectorAll(".filter-btn").forEach((btn) => {
+          btn.style.background = "#e0e0e0";
+          btn.style.color = "black";
+        });
+        event.target.style.background = "#027a31";
+        event.target.style.color = "white";
+        loadOrders();
+      }
+
+      function renderOrders(orders) {
+        const container = document.getElementById("orders-list");
+        let filtered = orders;
+        if (currentFilter !== "all")
+          filtered = orders.filter((o) => o.status === currentFilter);
+        if (filtered.length === 0) {
+          container.innerHTML =
+            '<p style="text-align:center;color:#666;padding:3rem;">No orders found</p>';
+          return;
+        }
+        container.innerHTML = filtered
+          .map((order) => {
+            const total = order.items.reduce(
+              (sum, item) => sum + item.price * item.quantity,
+              0,
+            );
+            const gst = total * 0.15;
+            const grand = total + gst;
+            return `
+                    <div class="order-card status-${order.status}">
+                        <div style="display:flex;justify-content:space-between;margin-bottom:1rem;">
+                            <div>
+                                <strong style="color:#027a31;">${order.id}</strong>
+                                <div style="font-size:0.85rem;color:#666;">${new Date(order.timestamp).toLocaleString()}</div>
+                            </div>
+                            <span style="background:${getStatusColor(order.status)};color:white;padding:0.25rem 0.75rem;border-radius:20px;font-size:0.8rem;text-transform:uppercase;">${order.status}</span>
+                        </div>
+                        <div style="background:#f6f7fb;padding:1rem;border-radius:8px;margin-bottom:1rem;">
+                            <strong>${order.customer.name}</strong> • Table: ${order.customer.table} • ${order.customer.phone}<br>
+                            <span style="color:#666;">${order.customer.location === "dominion" ? "Dominion Road" : "Stoddard Road"}</span>
+                        </div>
+                        <div style="margin-bottom:1rem;">
+                            ${order.items
+                              .map(
+                                (item) => `
+                                <div style="display:flex;justify-content:space-between;padding:0.5rem 0;border-bottom:1px solid #eee;">
+                                    <span>${item.title} x${item.quantity}</span>
+                                    <span style="font-weight:600;">$${(item.price * item.quantity).toFixed(2)}</span>
+                                </div>
+                            `,
+                              )
+                              .join("")}
+                        </div>
+                        <div style="display:flex;justify-content:space-between;align-items:center;padding-top:1rem;border-top:2px solid #eee;">
+                            <div style="font-size:1.2rem;font-weight:700;color:#027a31;">Total: $${grand.toFixed(2)}</div>
+                            <div style="display:flex;gap:0.5rem;">
+                                ${order.status === "new" ? `<button onclick="updateStatus('${order.id}', 'preparing')" style="padding:0.5rem 1rem;background:#f59e0b;color:white;border:none;border-radius:8px;cursor:pointer;">Start</button>` : ""}
+                                ${order.status === "preparing" ? `<button onclick="updateStatus('${order.id}', 'ready')" style="padding:0.5rem 1rem;background:#3b82f6;color:white;border:none;border-radius:8px;cursor:pointer;">Ready</button>` : ""}
+                                ${order.status === "ready" ? `<button onclick="updateStatus('${order.id}', 'completed')" style="padding:0.5rem 1rem;background:#14a44d;color:white;border:none;border-radius:8px;cursor:pointer;">Complete</button>` : ""}
+                                <button onclick="deleteOrder('${order.id}')" style="padding:0.5rem 1rem;background:#dc2626;color:white;border:none;border-radius:8px;cursor:pointer;">Delete</button>
+                            </div>
+                        </div>
+                        ${order.customer.notes ? `<div style="margin-top:1rem;padding:0.75rem;background:#fff3cd;border-radius:8px;"><strong>Notes:</strong> ${order.customer.notes}</div>` : ""}
+                    </div>
+                `;
+          })
+          .join("");
+      }
+
+      function getStatusColor(status) {
+        const colors = {
+          new: "#14a44d",
+          preparing: "#f59e0b",
+          ready: "#3b82f6",
+          completed: "#6b7280",
+        };
+        return colors[status] || "#666";
+      }
+
+      function updateStatus(id, status) {
+        let orders = JSON.parse(localStorage.getItem("dv_orders") || "[]");
+        const idx = orders.findIndex((o) => o.id === id);
+        if (idx !== -1) {
+          orders[idx].status = status;
+          localStorage.setItem("dv_orders", JSON.stringify(orders));
+          loadOrders();
+        }
+      }
+
+      function deleteOrder(id) {
+        if (!confirm("Delete this order?")) return;
+        let orders = JSON.parse(localStorage.getItem("dv_orders") || "[]");
+        orders = orders.filter((o) => o.id !== id);
+        localStorage.setItem("dv_orders", JSON.stringify(orders));
+        loadOrders();
+      }
+
+      if (sessionStorage.getItem("dv_admin") === "1") {
+        showDashboard();
+      }
+    </script>
+  </body>
+</html>
