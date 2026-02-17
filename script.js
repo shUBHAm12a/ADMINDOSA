@@ -2,13 +2,11 @@ const API_URL = 'https://dosavilas.netlify.app/.netlify/functions';
 const ADMIN_TOKEN = 'dosa-vilas-secret-123';
 let currentFilter = 'all';
 
-// Login check
 function doLogin(e) {
   e.preventDefault();
   const u = document.getElementById("admin-user").value;
   const p = document.getElementById("admin-pass").value;
   
-  // Simple check - in production use hashed password
   if (u === "admin" && p === "admin123") {
     sessionStorage.setItem("dv_admin", "1");
     showDashboard();
@@ -27,7 +25,7 @@ function showDashboard() {
   document.getElementById("login-screen").style.display = "none";
   document.getElementById("dashboard").style.display = "block";
   loadOrders();
-  setInterval(loadOrders, 10000); // Refresh every 10 seconds
+  setInterval(loadOrders, 10000);
 }
 
 async function loadOrders() {
@@ -37,7 +35,7 @@ async function loadOrders() {
     });
     
     if (response.status === 401) {
-      alert('Session expired. Please login again.');
+      alert('Session expired');
       logout();
       return;
     }
@@ -48,7 +46,7 @@ async function loadOrders() {
   } catch (err) {
     console.error('Failed to load orders:', err);
     document.getElementById('orders-list').innerHTML = 
-      '<p style="text-align:center;color:#dc2626;padding:3rem;">Failed to load orders. Check your connection.</p>';
+      '<p style="text-align:center;color:#dc2626;padding:3rem;">Failed to load orders</p>';
   }
 }
 
@@ -151,11 +149,10 @@ async function updateStatus(id, status) {
     }
   } catch (err) {
     console.error('Update failed:', err);
-    alert('Connection error. Please try again.');
+    alert('Connection error');
   }
 }
 
-// Check auth on load
 if (sessionStorage.getItem("dv_admin") === "1") {
   showDashboard();
 }
