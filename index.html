@@ -318,7 +318,10 @@
       const SUPABASE_URL = "https://gujvwytcjmbkxeyntlev.supabase.co";
       const SUPABASE_KEY = "sb_publishable_DtheUEWz88Yvt_f_W6-kcg_oLi-zDWj";
 
-      let supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+      const supabaseClient = window.supabase.createClient(
+        SUPABASE_URL,
+        SUPABASE_KEY,
+      );
       let orders = [];
       let currentFilter = "all";
 
@@ -350,7 +353,7 @@
         await loadOrders();
 
         // Realtime updates
-        supabase
+        supabaseClient
           .channel("orders")
           .on(
             "postgres_changes",
@@ -363,7 +366,7 @@
       }
 
       async function loadOrders() {
-        const { data, error } = await supabase
+        const { data, error } = await supabaseClient
           .from("orders")
           .select("*")
           .order("created_at", { ascending: false });
@@ -468,13 +471,13 @@
       //
       //
       async function update(id, status) {
-        await supabase.from("orders").update({ status }).eq("id", id);
+        await supabaseClient.from("orders").update({ status }).eq("id", id);
         loadOrders();
       }
 
       async function del(id) {
         if (!confirm("Delete?")) return;
-        await supabase.from("orders").delete().eq("id", id);
+        await supabaseClient.from("orders").delete().eq("id", id);
         loadOrders();
       }
     </script>
