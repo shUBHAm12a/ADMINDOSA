@@ -4,7 +4,6 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Admin - Dosa Vilas</title>
-    <!-- adminpage -->
     <link
       href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap"
       rel="stylesheet"
@@ -107,7 +106,40 @@
         color: #027a31;
       }
 
-      .filters {
+      /* Location Filter Buttons - Matching your image */
+      .location-filters {
+        display: flex;
+        gap: 1rem;
+        margin-bottom: 1.5rem;
+        flex-wrap: wrap;
+      }
+
+      .location-btn {
+        flex: 1;
+        min-width: 200px;
+        padding: 1rem 1.5rem;
+        border: none;
+        border-radius: 999px;
+        background: #f0f0f0;
+        color: #333;
+        font-size: 1rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        text-align: center;
+      }
+
+      .location-btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+      }
+
+      .location-btn.active {
+        background: #ffd700; /* Gold/yellow color from your image */
+        color: #000;
+      }
+
+      .status-filters {
         display: flex;
         gap: 0.5rem;
         margin-bottom: 1rem;
@@ -219,6 +251,26 @@
         background: #dc2626;
       }
 
+      /* Location badge */
+      .location-badge {
+        display: inline-block;
+        padding: 0.2rem 0.6rem;
+        border-radius: 12px;
+        font-size: 0.75rem;
+        font-weight: 600;
+        margin-left: 0.5rem;
+      }
+
+      .location-dominion {
+        background: #e3f2fd;
+        color: #1976d2;
+      }
+
+      .location-stoddard {
+        background: #f3e5f5;
+        color: #7b1fa2;
+      }
+
       @media (max-width: 768px) {
         .stats {
           grid-template-columns: repeat(2, 1fr);
@@ -237,6 +289,9 @@
         }
         .btn {
           flex: 1;
+        }
+        .location-btn {
+          min-width: 100%;
         }
       }
     </style>
@@ -297,14 +352,27 @@
           </div>
         </div>
 
-        <div class="filters">
-          <button class="filter-btn active" onclick="filter('all')">All</button>
-          <button class="filter-btn" onclick="filter('new')">New</button>
-          <button class="filter-btn" onclick="filter('preparing')">
+        <!-- Location Filter Buttons (like your image) -->
+        <div class="location-filters">
+          <button class="location-btn active" onclick="filterLocation('all')">
+            All Locations
+          </button>
+          <button class="location-btn" onclick="filterLocation('dominion')">
+            Dominion Road Location
+          </button>
+          <button class="location-btn" onclick="filterLocation('stoddard')">
+            Stoddard Road, Mt Roskill Location
+          </button>
+        </div>
+
+        <div class="status-filters">
+          <button class="filter-btn active" onclick="filterStatus('all')">All</button>
+          <button class="filter-btn" onclick="filterStatus('new')">New</button>
+          <button class="filter-btn" onclick="filterStatus('preparing')">
             Preparing
           </button>
-          <button class="filter-btn" onclick="filter('ready')">Ready</button>
-          <button class="filter-btn" onclick="filter('completed')">
+          <button class="filter-btn" onclick="filterStatus('ready')">Ready</button>
+          <button class="filter-btn" onclick="filterStatus('completed')">
             Completed
           </button>
         </div>
@@ -323,7 +391,8 @@
         SUPABASE_KEY,
       );
       let orders = [];
-      let currentFilter = "all";
+      let currentStatusFilter = "all";
+      let currentLocationFilter = "all";
 
       // Check session
       if (sessionStorage.getItem("admin") === "1") showDashboard();
@@ -380,56 +449,88 @@
 
       function updateStats() {
         const today = new Date().toDateString();
-        document.getElementById("stat-new").textContent = orders.filter(
+        
+        // Filter by location if selected
+        const filteredOrders = currentLocationFilter === 'all' 
+          ? orders 
+          : orders.filter(o => o.customer?.location === currentLocationFilter);
+
+        document.getElementById("stat-new").textContent = filteredOrders.filter(
           (o) => o.status === "new",
         ).length;
-        document.getElementById("stat-prep").textContent = orders.filter(
+        document.getElementById("stat-prep").textContent = filteredOrders.filter(
           (o) => o.status === "preparing",
         ).length;
-        document.getElementById("stat-ready").textContent = orders.filter(
+        document.getElementById("stat-ready").textContent = filteredOrders.filter(
           (o) => o.status === "ready",
         ).length;
-        document.getElementById("stat-total").textContent = orders.filter(
+        document.getElementById("stat-total").textContent = filteredOrders.filter(
           (o) => new Date(o.created_at).toDateString() === today,
         ).length;
       }
 
-      function filter(status) {
-        currentFilter = status;
+      function filterLocation(location) {
+        currentLocationFilter = location;
+        
+        // Update button styles
+        document.querySelectorAll(".location-btn").forEach((btn) => {
+          btn.classList.remove("active");
+        });
+        event.target.classList.add("active");
+        
+        updateStats();
+        render();
+      }
+
+      function filterStatus(status) {
+        currentStatusFilter = status;
         document
-          .querySelectorAll(".filter-btn")
+          .querySelectorAll(".status-filters .filter-btn")
           .forEach((b) => b.classList.remove("active"));
         event.target.classList.add("active");
         render();
       }
 
-      //
       function render() {
-        let filtered =
-          currentFilter === "all"
-            ? orders
-            : orders.filter((o) => o.status === currentFilter);
+        // Apply both filters
+        let filtered = orders;
+
+        // Location filter
+        if (currentLocationFilter !== "all") {
+          filtered = filtered.filter((o) => o.customer?.location === currentLocationFilter);
+        }
+
+        // Status filter
+        if (currentStatusFilter !== "all") {
+          filtered = filtered.filter((o) => o.status === currentStatusFilter);
+        }
+
         const container = document.getElementById("orders");
 
         if (filtered.length === 0) {
           container.innerHTML =
-            '<p style="text-align:center;color:#666;padding:2rem;">No orders</p>';
+            '<p style="text-align:center;color:#666;padding:2rem;">No orders found</p>';
           return;
         }
 
         container.innerHTML = filtered
           .map((order) => {
-            // Read from customer JSONB field
             const customer = order.customer || {};
             const items = order.items || [];
             const total = items.reduce((s, i) => s + i.price * i.quantity, 0);
             const gst = total * 0.15;
+            
+            const locationClass = customer.location === 'dominion' ? 'location-dominion' : 
+                                 customer.location === 'stoddard' ? 'location-stoddard' : '';
+            const locationLabel = customer.location === 'dominion' ? 'Dominion Rd' : 
+                                  customer.location === 'stoddard' ? 'Stoddard Rd' : 'N/A';
 
             return `
                 <div class="order-card">
                     <div class="order-header">
                         <div>
                             <strong style="color:#027a31;">#${order.id.slice(-6).toUpperCase()}</strong>
+                            <span class="location-badge ${locationClass}">${locationLabel}</span>
                             <div style="font-size:0.8rem;color:#666;">${new Date(order.created_at).toLocaleString()}</div>
                         </div>
                         <span class="status status-${order.status || "new"}">${order.status || "new"}</span>
@@ -438,7 +539,6 @@
                     <div class="customer-info">
                         <strong>${customer.name || "N/A"}</strong> • Table ${customer.table || "N/A"}<br>
                         ${customer.phone ? customer.phone + " • " : ""}
-                        ${customer.location === "dominion" ? "Dominion Rd" : customer.location === "stoddard" ? "Stoddard Rd" : "N/A"}
                         ${customer.notes ? "<br><em>Notes: " + customer.notes + "</em>" : ""}
                     </div>
                     
@@ -468,15 +568,13 @@
           .join("");
       }
 
-      //
-      //
       async function update(id, status) {
         await supabaseClient.from("orders").update({ status }).eq("id", id);
         loadOrders();
       }
 
       async function del(id) {
-        if (!confirm("Delete?")) return;
+        if (!confirm("Delete this order?")) return;
         await supabaseClient.from("orders").delete().eq("id", id);
         loadOrders();
       }
