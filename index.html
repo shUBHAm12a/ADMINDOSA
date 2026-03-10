@@ -558,15 +558,25 @@
 
         container.innerHTML = filtered
           .map((order) => {
-            const customer = order.customer || {};
+            const customer = order.customer || order.customer_name || {};
             const items = order.items || [];
             const total = items.reduce((s, i) => s + i.price * i.quantity, 0);
             const gst = total * 0.15;
-            
-            const locationClass = customer.location === 'dominion' ? 'location-dominion' : 
-                                 customer.location === 'stoddard' ? 'location-stoddard' : '';
-            const locationLabel = customer.location === 'dominion' ? 'Dominion Rd' : 
-                                  customer.location === 'stoddard' ? 'Stoddard Rd' : 'N/A';
+
+            const locationValue = customer.location ?? order.location ?? "";
+            const locationClass = locationValue === 'dominion' ? 'location-dominion' : 
+                                 locationValue === 'stoddard' ? 'location-stoddard' : '';
+            const locationLabel = locationValue === 'dominion' ? 'Dominion Rd' : 
+                                  locationValue === 'stoddard' ? 'Stoddard Rd' : 'N/A';
+            const tableNumber =
+              customer.table ??
+              order.table_number ??
+              order.table ??
+              "N/A";
+            const notesText =
+              customer.notes ??
+              order.notes ??
+              "";
 
             return `
                 <div class="order-card">
@@ -580,9 +590,9 @@
                     </div>
                     
                     <div class="customer-info">
-                        <strong>${customer.name || "N/A"}</strong> • Table ${customer.table || "N/A"}<br>
+                        <strong>${customer.name || "N/A"}</strong> • Table ${tableNumber}<br>
                         ${customer.phone ? customer.phone + " • " : ""}
-                        ${customer.notes ? "<br><em>Notes: " + customer.notes + "</em>" : ""}
+                        ${notesText ? "<br><em>Notes: " + notesText + "</em>" : ""}
                     </div>
                     
                     ${items
