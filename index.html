@@ -577,6 +577,10 @@
               customer.notes ??
               order.notes ??
               "";
+            const customerName =
+              (typeof customer === "string" ? customer : customer.name) ??
+              order.name ??
+              "N/A";
 
             return `
                 <div class="order-card">
@@ -590,7 +594,7 @@
                     </div>
                     
                     <div class="customer-info">
-                        <strong>${customer.name || "N/A"}</strong> • Table ${tableNumber}<br>
+                        <strong>${customerName}</strong> • Table ${tableNumber}<br>
                         ${customer.phone ? customer.phone + " • " : ""}
                         ${notesText ? "<br><em>Notes: " + notesText + "</em>" : ""}
                     </div>
