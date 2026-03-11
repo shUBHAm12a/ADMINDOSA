@@ -561,7 +561,6 @@
             const customer = order.customer || order.customer_name || {};
             const items = order.items || [];
             const total = items.reduce((s, i) => s + i.price * i.quantity, 0);
-            const gst = total * 0.15;
 
             const locationValue = customer.location ?? order.location ?? "";
             const locationClass = locationValue === 'dominion' ? 'location-dominion' : 
@@ -614,7 +613,7 @@
                       .join("")}
                     
                     <div class="order-footer">
-                        <div class="total">Total: $${(total + gst).toFixed(2)}</div>
+                        <div class="total">Total: $${(total).toFixed(2)}</div>
                         <div class="actions">
                             ${order.status === "new" ? `<button class="btn btn-start" onclick="update('${order.id}', 'preparing')">Start</button>` : ""}
                             ${order.status === "preparing" ? `<button class="btn btn-ready" onclick="update('${order.id}', 'ready')">Ready</button>` : ""}
